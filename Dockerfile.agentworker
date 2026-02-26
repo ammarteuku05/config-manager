@@ -1,0 +1,19 @@
+FROM golang:1.24-alpine AS builder
+
+RUN apk add --no-cache gcc musl-dev
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+# Build with ldflags to strip debug info for smaller image
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o agentworker-app main.go
+
+FROM alpine:3.18
+WORKDIR /app
+COPY --from=builder /app/agentworker-app .
+
+EXPOSE 8081 8082
+
+ENTRYPOINT ["/app/agentworker-app"]

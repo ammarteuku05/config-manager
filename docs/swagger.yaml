@@ -1,0 +1,126 @@
+basePath: /v1
+definitions:
+  dto.AgentRegisterRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.AgentRegisterResponse:
+    properties:
+      agent_id:
+        type: string
+      poll_interval_seconds:
+        type: integer
+      poll_url:
+        type: string
+    type: object
+  dto.ConfigRequest:
+    properties:
+      config:
+        additionalProperties: true
+        type: object
+    type: object
+  dto.ConfigResponse:
+    properties:
+      config:
+        additionalProperties: true
+        type: object
+      version:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a distributed configuration management system server.
+  title: Distributed Config Manager API
+  version: "1.0"
+paths:
+  /config:
+    get:
+      description: Get the global configuration for workers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ConfigResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get global config
+      tags:
+      - Config
+    post:
+      consumes:
+      - application/json
+      description: Update the global configuration for all workers
+      parameters:
+      - description: New Configuration
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Save global config
+      tags:
+      - Config
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new agent and get polling details
+      parameters:
+      - description: Agent Registration
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AgentRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AgentRegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new agent
+      tags:
+      - Agent
+swagger: "2.0"

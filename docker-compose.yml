@@ -1,0 +1,39 @@
+services:
+  controller:
+    build:
+      context: .
+      dockerfile: Dockerfile.controller
+    ports:
+      - "8080:8080"
+    environment:
+      - CONTROLLER_PORT=8080
+      - DB_PATH=/app/db/controller.db
+      - POLL_INTERVAL=30
+    volumes:
+      - controller-data:/app/db
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agentworker
+    command: [ "agent" ]
+    environment:
+      - AGENT_PORT=8081
+      - WORKER_PORT=8082
+      - CONTROLLER_URL=http://controller:8080
+    depends_on:
+      - controller
+      - worker
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.agentworker
+    ports:
+      - "8082:8082"
+    command: [ "worker" ]
+    environment:
+      - WORKER_PORT=8082
+
+volumes:
+  controller-data:
